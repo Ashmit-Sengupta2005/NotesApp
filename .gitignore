@@ -1,0 +1,25 @@
+# Ignore dependency folders
+node_modules/
+FrontEnd/node_modules/
+BackEnd/node_modules/
+
+# Ignore production builds
+FrontEnd/dist/
+
+# Ignore environment variables (Secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+BackEnd/.env
+
+# Ignore logs
+*.log
+
+# Ignore OS junk
+.DS_Store
+Thumbs.db
+
+# Ignore agents rules
+.agents/
