@@ -22,6 +22,13 @@ const Navbar = () => {
                 </div>
             </div>
 
+            {/* Middle Welcome Text (Only shows if logged in) */}
+            {user && (
+                <div className="hidden sm:inline-block text-sm font-semibold text-base-content/60 bg-base-200/30 px-3 py-1.5 rounded-xl border border-base-content/5 shadow-sm">
+                    Welcome, <span className="text-amber-400 font-bold">{user.username}</span>
+                </div>
+            )}
+
             {/* User Controls (Only show if user is logged in) */}
             <div className="flex items-center gap-3 md:gap-4">
                 {user && (
