@@ -24,8 +24,8 @@ const Navbar = () => {
 
             {/* Middle Welcome Text (Only shows if logged in) */}
             {user && (
-                <div className="hidden sm:inline-block text-sm font-semibold text-base-content/60 bg-base-200/30 px-3 py-1.5 rounded-xl border border-base-content/5 shadow-sm">
-                    Welcome, <span className="text-amber-400 font-bold">{user.username}</span>
+                <div className="hidden sm:inline-block text-xs font-black tracking-widest text-base-content/50 uppercase bg-amber-400/5 px-4 py-2 rounded-xl border border-amber-400/10 shadow-md">
+                    Welcome, <span className="text-amber-400">{user.username}</span>
                 </div>
             )}
 
