@@ -59,7 +59,7 @@ const Note_Id = () => {
     <>
       {errorFound&& <ErrorPage/>}
       {!errorFound && rateLimited && <RateLimitedUI />}
-      {!errorFound && !rateLimited && loading && <Loading />}
+      {!errorFound && !rateLimited && loading && <Loading message="Loading note details..." description="Fetching your note content..." />}
       {!errorFound && !rateLimited && !loading && note && (
         <div className="bg-base-300 min-h-screen flex flex-col justify-center items-center p-4 md:p-6 animate-fade-in-up">
           <div className="max-w-3xl w-full flex flex-col gap-4">

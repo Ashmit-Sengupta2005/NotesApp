@@ -1,6 +1,9 @@
 import { Notebook } from "lucide-react";
 
-function Loading() {
+function Loading({ 
+  message = "Loading your notes...", 
+  description = "This might take a while. Please hold on!" 
+}) {
   return (
     <div className="flex flex-col justify-center items-center py-20 px-4 text-center">
       <div className="relative w-20 h-20 flex items-center justify-center mb-6">
@@ -12,13 +15,13 @@ function Loading() {
         </div>
       </div>
       <h3 className="text-xl font-bold text-amber-400 mb-2 tracking-wide">
-        Loading your notes...
+        {message}
       </h3>
       <p className="text-sm text-base-content/60 max-w-xs leading-relaxed">
-        This might take a while. Please hold on!
+        {description}
       </p>
     </div>
-  )
+  );
 }
 
 export default Loading;

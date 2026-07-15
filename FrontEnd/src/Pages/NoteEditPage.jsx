@@ -85,7 +85,7 @@ function NoteEditPage() {
   return (
     <div>
       {rateLimited&&<RateLimitedUI/>}
-     {loading && !rateLimited&& <Loading/>}
+     {loading && !rateLimited&& <Loading message="Loading editor..." description="Fetching note details..." />}
      {!rateLimited&&!loading&&(
         <div className="bg-base-300 min-h-screen flex flex-col justify-center items-center p-4 md:p-6 animate-fade-in-up">
            <div className="max-w-3xl w-full flex flex-col gap-4">
