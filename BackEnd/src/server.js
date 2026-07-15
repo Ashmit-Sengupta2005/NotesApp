@@ -38,10 +38,14 @@ app.use(rateLimiter);
 const port=process.env.PORT;
 app.use("/api/notes", notesRoutes);
 app.use("/api/auth",authRoutes);
-connectDB().then(()=>{
-app.listen(port, () => {
-    console.log(`Server is running on port`+ port );})})
-.catch((error)=>{
+connectDB().catch((error)=>{
     console.log("MongoDB Connection Error:",error.message);
     process.exit(1);
 });
+if(process.env.NODE_ENV!=="production"){
+    app.listen(port,()=>{
+        console.log(`Server is running on port ${port}`);
+    })
+}
+
+export default app;
