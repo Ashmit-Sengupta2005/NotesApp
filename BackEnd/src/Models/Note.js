@@ -12,8 +12,16 @@ const noteSchema=new mongoose.Schema({
     user: {
         type:mongoose.Schema.Types.ObjectId,
         required:true,
-        ref:"User"
-    }},
+        ref:"User"},
+    isPinned:{
+        type:Boolean,
+        default:false,
+    },
+    isProtected:{
+        type:Boolean,
+        default:false,
+    },
+},
     {timestamps:true}); // automatically adds two fields createdAt & updatedAt to the schema
 
 export const Note=mongoose.model("Note",noteSchema);

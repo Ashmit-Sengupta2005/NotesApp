@@ -37,13 +37,17 @@ const HomePage = () => {
     setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
   };
 
+  const handleUpdateNote = (updatedNote) => {
+    setNotes((prevNotes) => prevNotes.map((note) => note._id === updatedNote._id ? updatedNote : note));
+  };
+
   return (
     <div className="min-h-screen bg-base-300">
       <Navbar/>
       {rateLimited&& <RateLimitedUI/>}
       {loading && !rateLimited && <Loading/>}
       {!rateLimited && !loading && notes.length===0&& <NotesNotFound/>}
-      {!rateLimited && !loading &&notes.length>0&& <NotesDisplayPage notes={notes} onDelete={handleDeleteNote}/> }
+      {!rateLimited && !loading &&notes.length>0&& <NotesDisplayPage notes={notes} onDelete={handleDeleteNote} onUpdate={handleUpdateNote}/> }
       </div>
   )
 }

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Calendar, Pin, Trash2 } from "lucide-react";
-import { Link } from "react-router";
+import { Calendar, Pin, Trash2, Lock } from "lucide-react";
+import { useNavigate } from "react-router";
 import { api } from "../lib/axios";
 import toast from "react-hot-toast";
-
+import {useAuth } from "../Context/AuthContext.jsx";
+import VaultModal from "./VaultModal.jsx";
 const stripHtml = (html) => {
   if (!html) return "";
   
@@ -19,10 +20,34 @@ const stripHtml = (html) => {
   return txt.value.trim();
 };
 
-function NoteCard({note, index, onDelete}) {
+function NoteCard({note, index, onDelete, onUpdate}) {
   const [showModal, setShowModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [pinLoading, setPinLoading] = useState(false);
+  const [showVault,setShowVault]=useState(false);
+  const [vaultAction, setVaultAction] = useState("toggle");
+  const {user}=useAuth();
+  const navigate = useNavigate();
 
+  const handleCardClick = () => {
+    if (note.isProtected) {
+      setVaultAction("view");
+      setShowVault(true);
+    } else {
+      navigate(`/note/${note._id}`);
+    }
+  };
+
+  const handleToggleProtect=async(pin)=>{
+    try{
+      const res = await api.put(`/notes/${note._id}/protect`, { pin });
+      if (onUpdate) onUpdate(res.data.note);
+    }
+    catch(error){
+      console.error("Error toggling protection:", error);
+      toast.error(error.response?.data?.message || "Failed to update protection");
+    }
+  };
   const handleDeleteConfirm = async () => {
     setDeleteLoading(true);
     try {
@@ -38,22 +63,69 @@ function NoteCard({note, index, onDelete}) {
     }
   };
 
+  const handleTogglePin = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pinLoading) return;
+    
+    setPinLoading(true);
+    try {
+      const res = await api.put(`/notes/${note._id}/pin`);
+      if (onUpdate) onUpdate(res.data.note);
+    } catch (error) {
+      console.error("Error pinning note:", error);
+      toast.error(error.response?.data?.message || "Failed to pin note");
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
   return (
     <>
-      <Link to={`/note/${note._id}`} 
-        className="group bg-base-100/60 backdrop-blur-md border border-base-content/10 rounded-2xl p-5 shadow-lg flex flex-col justify-between min-h-[160px] hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 ease-out animate-fade-in-up"
+      <div 
+        onClick={handleCardClick}
+        className="group bg-base-100/60 backdrop-blur-md border border-base-content/10 rounded-2xl p-5 shadow-lg flex flex-col justify-between min-h-[160px] hover:shadow-2xl hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 ease-out animate-fade-in-up cursor-pointer"
         style={{ animationDelay: `${index * 80}ms` }}>
         <div>
           <div className="flex justify-between items-start gap-2 mb-2">
             <h2 className="text-primary text-xl font-bold transition-all duration-300 ease-out group-hover:translate-x-1">
               {note.title}
             </h2>
-            <span className="text-primary/20 group-hover:text-primary/60 transition-colors duration-300 mt-1">
-              <Pin className="size-4" />
-            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <span 
+                title={note.isProtected ? "Unlock Note" : "Lock Note"}
+                className={`${note.isProtected ? "text-primary" : "text-base-content/30 hover:text-base-content/80"} transition-colors duration-300 cursor-pointer`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  if (!user?.hasVaultPin) {
+                    // They don't have a Vault PIN set up yet! Show modal to create one.
+                    setVaultAction("toggle");
+                    setShowVault(true);
+                  } else if (note.isProtected) {
+                    // The note is locked. We need the PIN to unlock it.
+                    setVaultAction("toggle");
+                    setShowVault(true);
+                  } else {
+                    // The note is unlocked AND they already have a PIN. Lock it immediately!
+                    handleToggleProtect(); 
+                  }
+                }}
+              >
+                <Lock className="size-5" />
+              </span>
+              <span 
+                title={note.isPinned ? "Unpin Note" : "Pin Note"}
+                onClick={handleTogglePin}
+                className={`${note.isPinned ? "text-primary" : "text-primary/20 group-hover:text-primary/60"} transition-colors duration-300 cursor-pointer hover:scale-110 active:scale-95`}
+              >
+                <Pin className={`size-5 ${note.isPinned ? "fill-primary" : ""}`} />
+              </span>
+            </div>
           </div>
           <p className="text-amber-500 text-sm leading-relaxed mb-4 break-words line-clamp-4 group-hover:text-amber-300 transition-colors duration-300">
-            {stripHtml(note.content)}
+            {note.isProtected ? "🔒 This note is protected. Enter your Vault PIN to view." : stripHtml(note.content)}
           </p>
         </div>
         <div className="flex items-center justify-between gap-4 text-xs text-base-content/50 border-t border-base-content/5 pt-3">
@@ -70,10 +142,10 @@ function NoteCard({note, index, onDelete}) {
             className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 hover:text-red-400 active:scale-95 transition-all duration-200"
             title="Delete Note"
           >
-            <Trash2 className="size-4 transition-transform duration-200 hover:scale-110" />
+            <Trash2 className="size-5 transition-transform duration-200 hover:scale-110" />
           </button>
         </div>
-      </Link>
+      </div>
 
       {/* Confirmation Modal */}
       {showModal && (
@@ -122,6 +194,23 @@ function NoteCard({note, index, onDelete}) {
           </div>
         </div>
       )}
+            {/* Vault Modal */}
+      {showVault && (
+        <VaultModal 
+          mode={user?.hasVaultPin ? "verify" : "setup"} 
+          onClose={() => {
+            setShowVault(false)}
+          }
+          onSuccess={(pin) => {
+            if (vaultAction === "toggle") {
+              handleToggleProtect(pin);
+            } else if (vaultAction === "view") {
+              navigate(`/note/${note._id}`, { state: { vaultPin: pin } });
+            }
+          }}
+        />
+      )}
+
     </>
   );
 }

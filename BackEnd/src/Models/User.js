@@ -21,7 +21,11 @@ const userSchema=new mongoose.Schema({
         type:String,
         unique:true,
         sparse:true
-    }
+    },
+    vaultPin:{
+        type:String,
+        default:null,
+    },
 },{timestamps:true})
 
 export const User=mongoose.model("User",userSchema);

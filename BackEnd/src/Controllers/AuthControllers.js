@@ -85,7 +85,8 @@ export const getMe=(req,res)=>{
         const userResponse={
                 id:req.user._id,
                 username:req.user.username,
-                email:req.user.email};
+                email:req.user.email,
+                hasVaultPin:!!req.user.vaultPin};
     return res.status(200).json({isAuthenticated:true,user:userResponse});  
     }
     return res.status(200).json({isAuthenticated:false,user:null});
@@ -99,4 +100,43 @@ export const googleLogin=passport.authenticate("google",{
 export const googleCallback=passport.authenticate("google",{
     successRedirect: process.env.FRONTEND_URL || "http://localhost:5174",
     failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5174"}/login`
-})
+});
+
+export const vaultSetUp=async(req,res)=>{
+    try{
+        const {pin,confirmPin}=req.body;
+        if(pin!==confirmPin){
+            return res.status(400).json({message:"Pins do not match"});
+        }
+        if(!pin|| pin.length!==4){
+            
+            return res.status(400).json({message:"PIN must be atleast 4 digits"});
+        }
+        const salt =await bcrypt.genSalt(11);
+        const hashPin=await bcrypt.hash(pin,salt);
+        req.user.vaultPin=hashPin;
+        await req.user.save();
+        res.status(200).json({message:"Vault Pin Set Successfully",done:true});
+    }
+    catch(error){
+        console.log("Error in setting up vault PIN: ",error.message);
+        res.status(500).json({message:"Internal Server Error"});
+    }
+};
+
+export const vaultVerify=async(req,res)=>{
+    try{
+        const {pin}=req.body;
+        if(!req.user.vaultPin){
+            return res.status(400).json({message:"No Vault PIN is set up for this account",verified:false});    
+        }
+        const isMatch=await bcrypt.compare(pin,req.user.vaultPin);
+        if(!isMatch){
+            return res.status(401).json({message:"Invalid Pin",verified:false});}
+        res.status(200).json({message:"PIN verified successfully",verified:true});
+    }
+    catch(error){
+        console.log("Error verifying vault PIN:", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
