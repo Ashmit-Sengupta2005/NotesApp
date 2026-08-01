@@ -1,6 +1,8 @@
 import { User } from "../Models/User.js";
 import passport from "passport";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+dotenv.config();
 // This page is dedicated to local 
 //Register
 export const registerUser=async(req,res,next)=>{
@@ -88,3 +90,13 @@ export const getMe=(req,res)=>{
     }
     return res.status(200).json({isAuthenticated:false,user:null});
 };
+
+//1. Initiates google auth flow
+export const googleLogin=passport.authenticate("google",{
+    scope:["profile","email"]
+});
+
+export const googleCallback=passport.authenticate("google",{
+    successRedirect: process.env.FRONTEND_URL || "http://localhost:5174",
+    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5174"}/login`
+})
