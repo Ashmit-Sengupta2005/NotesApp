@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -14,6 +14,9 @@ function NoteEditPage() {
     const [rateLimited,setRateLimited]=useState(false);
     const {id}=useParams();
     const navigate=useNavigate();
+    const location = useLocation();
+    const vaultPin = location.state?.vaultPin;
+    
     useEffect(() => {
       const timer = setTimeout(() => {
         const toolbar = document.querySelector(".ql-toolbar");
@@ -42,7 +45,12 @@ function NoteEditPage() {
     useEffect(()=>{
       const fetchNotes=async()=>{
         try{
-        const notes= await api.get(`/notes/${id}`);
+        let notes;
+        if (vaultPin) {
+            notes = await api.post(`/notes/${id}/unlock`, { pin: vaultPin });
+        } else {
+            notes = await api.get(`/notes/${id}`);
+        }
         setTitle(notes.data.title);
         setContent(notes.data.content);}
         catch(error){

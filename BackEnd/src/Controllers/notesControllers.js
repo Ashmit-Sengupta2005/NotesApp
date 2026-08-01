@@ -24,6 +24,10 @@ export const getNoteById=async (req,res)=>{
         const note=await Note.findOne({_id:id,user:req.user.id});
         if(!note){
             return res.status(404).json({message:"Note not found"});}
+            
+        if (note.isProtected) {
+            return res.status(200).json({...note.toObject(), content: "🔒 This note is protected. Enter your Vault PIN to view."});
+        }
         res.status(200).json(note);}
     catch(error){
         console.log(error.message);

@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -16,11 +16,18 @@ const Note_Id = () => {
   const [errorFound,setErrorFound]=useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
+  const vaultPin = location.state?.vaultPin;
 
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const data = (await api.get(`/notes/${id}`)).data;
+        let data;
+        if (vaultPin) {
+            data = (await api.post(`/notes/${id}/unlock`, { pin: vaultPin })).data;
+        } else {
+            data = (await api.get(`/notes/${id}`)).data;
+        }
         console.log(data);
         setNote(data);
         setRateLimited(false);
@@ -77,6 +84,7 @@ const Note_Id = () => {
               <div className="flex gap-2">
                 <Link
                   to={`/note/${id}/edit`}
+                  state={{ vaultPin }}
                   className="btn btn-warning btn-sm rounded-xl gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <Edit size={14} />
