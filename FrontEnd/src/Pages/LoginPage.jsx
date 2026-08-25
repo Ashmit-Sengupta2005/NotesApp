@@ -87,7 +87,7 @@ const LoginPage=()=>{
         
         <button 
           type="button" 
-          onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/auth/google`}
+          onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || "/api"}/auth/google`}
           className="btn btn-outline w-full rounded-xl flex items-center justify-center gap-2 font-semibold text-lg bg-base-100 hover:bg-base-200"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
