@@ -116,7 +116,7 @@ const Note_Id = () => {
 
               {/* Styled Rich Text Div */}
               <div
-                className="rich-text-content max-w-none text-base-content/90 leading-relaxed min-h-[150px] whitespace-pre-line focus:outline-none"
+                className="rich-text-content max-w-none text-base-content/90 leading-relaxed min-h-[150px] whitespace-pre-line break-words focus:outline-none"
                 dangerouslySetInnerHTML={{ __html: note.content }}
               />
               
